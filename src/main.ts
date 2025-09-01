@@ -15,6 +15,7 @@ async function bootstrap() {
 
 
   const allowed = parseOrigins(process.env.CORS_ORIGINS) ?? [];
+  console.log('CORS_ORIGINS =', process.env.CORS_ORIGINS);
   app.enableCors({
     origin: (origin, cb) => {
       if (!origin) return cb(null, true); // allow curl/postman
@@ -42,7 +43,7 @@ async function bootstrap() {
   const doc = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/docs', app, doc);
 
-  await app.listen(process.env.PORT ?? 3801);
+  await app.listen(process.env.PORT ?? 3801, '127.0.0.1');
 }
 bootstrap();
 
