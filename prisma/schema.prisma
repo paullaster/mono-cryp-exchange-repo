@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum KycStatus {
+  NOT_SUBMITTED
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  emailNorm     String         @unique
+  password      String
+  role          Role           @default(USER)
+  kycStatus     KycStatus      @default(NOT_SUBMITTED)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  kyc           KycSubmission?
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id          String   @id @default(uuid())
+  jti         String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  hash        String   // hashed refresh token (argon2)
+  fingerprint String
+  ip          String?
+  userAgent   String?
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([jti])
+}
+
+model KycSubmission {
+  id           String    @id @default(uuid())
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId       String    @unique
+  firstName    String
+  lastName     String
+  idNumber     String
+  country      String
+  status       KycStatus @default(PENDING)
+  submittedAt  DateTime  @default(now())
+  reviewedAt   DateTime?
+  providerMeta Json?
+  artifacts    Json?
+}
