@@ -15,6 +15,7 @@ export class KycController {
     @Post('submit')
     @UseInterceptors(FileInterceptor('document'))
     async submit(@Req() req: any, @Body() dto: KycSubmitDto, @UploadedFile() file?: Express.Multer.File) {
+        console.log(req.user);
         return this.kyc.submit(req.user.id, dto, file);
     }
 
